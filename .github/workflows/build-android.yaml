@@ -67,7 +67,7 @@ jobs:
         # 创建配方目录
         mkdir -p packages/curl-cffi
         
-        # 创建 meta.yaml 配置文件（已移除 script 字段）
+        # 创建 meta.yaml 配置文件（已移除 run 字段）
         cat > packages/curl-cffi/meta.yaml << 'EOF'
         package:
           name: curl-cffi
@@ -91,9 +91,6 @@ jobs:
             - python
             - cffi
             - pycparser
-          run:
-            - python
-            - cffi
 
         test:
           imports:
