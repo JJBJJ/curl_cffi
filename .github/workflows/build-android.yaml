@@ -67,7 +67,7 @@ jobs:
         # 创建配方目录
         mkdir -p packages/curl-cffi
         
-        # 创建 meta.yaml 配置文件
+        # 创建 meta.yaml 配置文件（已移除 script 字段）
         cat > packages/curl-cffi/meta.yaml << 'EOF'
         package:
           name: curl-cffi
@@ -78,7 +78,6 @@ jobs:
 
         build:
           number: 0
-          script: python -m pip install . --no-deps --no-build-isolation
 
         requirements:
           build:
@@ -101,26 +100,7 @@ jobs:
             - curl_cffi
         EOF
         
-        # 创建构建脚本
-        cat > packages/curl-cffi/build.sh << 'EOF'
-        #!/bin/bash
-        echo "开始构建 curl-cffi..."
-        
-        # 设置编译环境
-        export CFLAGS="$CFLAGS -I$PREFIX/include"
-        export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
-        
-        # 安装构建依赖
-        $PYTHON -m pip install cffi pycparser
-        
-        # 构建包
-        $PYTHON -m pip install . --no-deps --no-build-isolation
-        
-        echo "✅ curl-cffi 构建完成"
-        EOF
-        
-        chmod +x packages/curl-cffi/build.sh
-        echo "✅ curl-cffi 构建配方创建完成"
+        echo "✅ curl-cffi 构建配方创建完成（已修复 schema 验证问题）"
 
     - name: 🏗️ 构建 Android ABI 包
       run: |
