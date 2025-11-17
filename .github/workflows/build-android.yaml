@@ -73,8 +73,7 @@ jobs:
             version: 0.7.0
 
           source:
-            git_url: https://github.com/lexiforest/curl_cffi.git
-            git_rev: master
+            path: ../../../
 
           build:
             number: 0
@@ -92,6 +91,7 @@ jobs:
               - cffi
               - pycparser
           EOF
+                echo "✅ curl-cffi 配方写入完成"
 
       - name: 🏗️ 构建 Android 包
         run: |
