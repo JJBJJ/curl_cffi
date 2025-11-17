@@ -90,8 +90,8 @@ jobs:
             - python
             - cffi
             - pycparser
-    EOF
-        echo "✅ curl-cffi 配方创建完成（已修正源码路径）"
+        EOF
+            echo "✅ curl-cffi 配方创建完成（已修正源码路径）"
 
     - name: 🏗️ 构建 Android 包
       run: |
