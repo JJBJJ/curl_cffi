@@ -8,101 +8,101 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: 🛠️ 检出代码
-      uses: actions/checkout@v4
+      - name: 🛠️ 检出代码
+        uses: actions/checkout@v4
 
-    - name: 📥 克隆 Chaquopy
-      run: |
-        git clone --depth 1 https://github.com/chaquo/chaquopy.git
-        echo "✅ Chaquopy 克隆完成"
+      - name: 📥 克隆 Chaquopy
+        run: |
+          git clone --depth 1 https://github.com/chaquo/chaquopy.git
+          echo "✅ Chaquopy 克隆完成"
 
-    - name: 🐍 设置 Python 环境
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
+      - name: 🐍 设置 Python 环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
 
-    - name: 📦 安装系统工具
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y patch patchelf wget unzip
-        echo "✅ 系统工具安装完成"
+      - name: 📦 安装系统工具
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patch patchelf wget unzip
+          echo "✅ 系统工具安装完成"
 
-    - name: ⬇️ 下载 Python 目标文件
-      run: |
-        echo "下载 Python 3.8.20-1 目标文件..."
-        mkdir -p chaquopy/maven/com/chaquo/python/target/3.8.20-1
-        cd chaquopy/maven/com/chaquo/python/target/3.8.20-1
-        
-        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-arm64-v8a.zip
-        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-armeabi-v7a.zip
-        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib.zip
-        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib-pyc.zip
-        
-        unzip -o target-3.8.20-1-arm64-v8a.zip
-        unzip -o target-3.8.20-1-armeabi-v7a.zip
-        unzip -o target-3.8.20-1-stdlib.zip
-        unzip -o target-3.8.20-1-stdlib-pyc.zip
-        echo "✅ Python 目标文件下载完成"
+      - name: ⬇️ 下载 Python 目标文件
+        run: |
+          echo "下载 Python 3.8.20-1 目标文件..."
+          mkdir -p chaquopy/maven/com/chaquo/python/target/3.8.20-1
+          cd chaquopy/maven/com/chaquo/python/target/3.8.20-1
 
-    - name: 🔧 设置 Android SDK
-      run: |
-        echo "设置 Android SDK..."
-        mkdir -p android-sdk/cmdline-tools
-        cd android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip -d latest/
-        echo "ANDROID_HOME=$PWD/.." >> $GITHUB_ENV
-        echo "✅ Android SDK 设置完成"
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-arm64-v8a.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-armeabi-v7a.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib-pyc.zip
 
-    - name: 📚 准备构建环境
-      run: |
-        cd chaquopy/server/pypi
-        pip install -r requirements.txt
-        echo "✅ Python 依赖安装完成"
+          unzip -o target-3.8.20-1-arm64-v8a.zip
+          unzip -o target-3.8.20-1-armeabi-v7a.zip
+          unzip -o target-3.8.20-1-stdlib.zip
+          unzip -o target-3.8.20-1-stdlib-pyc.zip
+          echo "✅ Python 目标文件下载完成"
 
-    - name: 📝 创建 curl-cffi 配方（修正版）
-      run: |
-        cd chaquopy/server/pypi
-        mkdir -p packages/curl-cffi
-        
-        cat > packages/curl-cffi/meta.yaml << 'EOF'
-        package:
-          name: curl-cffi
-          version: 0.7.0
+      - name: 🔧 设置 Android SDK
+        run: |
+          echo "设置 Android SDK..."
+          mkdir -p android-sdk/cmdline-tools
+          cd android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip -d latest/
+          echo "ANDROID_HOME=$PWD/.." >> $GITHUB_ENV
+          echo "✅ Android SDK 设置完成"
 
-        source:
-          path: ../../../../../../  # 修正：指向项目根目录
+      - name: 📚 准备构建环境
+        run: |
+          cd chaquopy/server/pypi
+          pip install -r requirements.txt
+          echo "✅ Python 依赖安装完成"
 
-        build:
-          number: 0
+      - name: 📝 创建 curl-cffi 配方
+        run: |
+          cd chaquopy/server/pypi
+          mkdir -p packages/curl-cffi
 
-        requirements:
+          cat > packages/curl-cffi/meta.yaml <<'EOF'
+          package:
+            name: curl-cffi
+            version: 0.7.0
+
+          source:
+            git_url: https://github.com/lexiforest/curl_cffi.git
+            git_rev: master
+
           build:
-            - python
-            - pip
-            - setuptools
-            - wheel
-            - cffi
-            - pycparser
-          host:
-            - python
-            - cffi
-            - pycparser
-        EOF
-            echo "✅ curl-cffi 配方创建完成（已修正源码路径）"
+            number: 0
 
-    - name: 🏗️ 构建 Android 包
-      run: |
-        cd chaquopy/server/pypi
-        for abi in arm64-v8a armeabi-v7a; do
-          echo "构建 $abi 架构..."
-          ./build-wheel.py --python 3.8 --abi $abi packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
-        done
+          requirements:
+            build:
+              - python
+              - pip
+              - setuptools
+              - wheel
+              - cffi
+              - pycparser
+            host:
+              - python
+              - cffi
+              - pycparser
+          EOF
 
-    - name: ⬆️ 上传产物
-      uses: actions/upload-artifact@v4
-      with:
-        name: curl-cffi-android-wheels
-        path: chaquopy/server/pypi/dist/
+      - name: 🏗️ 构建 Android 包
+        run: |
+          cd chaquopy/server/pypi
+          for abi in arm64-v8a armeabi-v7a; do
+            echo "构建 $abi 架构..."
+            ./build-wheel.py --python 3.8 --abi "$abi" packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
+          done
+
+      - name: ⬆️ 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: curl-cffi-android-wheels
+          path: chaquopy/server/pypi/dist/
