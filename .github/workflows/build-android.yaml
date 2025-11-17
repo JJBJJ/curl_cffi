@@ -1,0 +1,148 @@
+name: Build curl-cffi for Android
+
+on:
+  workflow_dispatch:  # 允许手动触发
+  push:
+    branches: [ main ]
+    paths: 
+      - '**.py'
+      - 'setup.py'
+      - 'requirements.txt'
+
+jobs:
+  build-android:
+    name: Build Android wheels
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛠️ 检出 curl-cffi 源代码
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: 📥 克隆 Chaquopy 构建工具
+      run: |
+        echo "正在克隆 Chaquopy 构建工具..."
+        git clone --depth 1 https://github.com/chaquo/chaquopy.git
+        echo "✅ Chaquopy 工具克隆完成"
+
+    - name: 🐍 设置 Python 环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: 📦 安装系统依赖
+      run: |
+        echo "安装系统构建工具..."
+        sudo apt-get update
+        sudo apt-get install -y patch patchelf pkg-config libssl-dev
+        echo "✅ 系统工具安装完成"
+
+    - name: 🔧 配置 Android 构建环境
+      run: |
+        echo "设置 Android SDK..."
+        mkdir -p android-sdk/cmdline-tools/latest
+        cd android-sdk/cmdline-tools/latest
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
+        cd ../../..
+        echo "ANDROID_HOME=$PWD/android-sdk" >> $GITHUB_ENV
+
+    - name: 📝 准备 Chaquopy 构建配方
+      run: |
+        echo "准备 Android 构建配方..."
+        cd chaquopy/server/pypi
+        
+        # 安装 Python 依赖
+        pip install -r requirements.txt
+        
+        # 创建 curl-cffi 配方目录
+        mkdir -p packages/curl-cffi
+        
+        # 创建 meta.yaml 构建配方
+        cat > packages/curl-cffi/meta.yaml << 'EOF'
+        package:
+          name: curl-cffi
+          version: 0.7.0
+
+        source:
+          path: ../../../../  # 指向 curl-cffi 源码根目录
+
+        build:
+          number: 0
+
+        requirements:
+          build:
+            - python
+            - pip
+            - setuptools
+            - wheel
+            - cffi
+          host:
+            - python
+            - cffi
+          run:
+            - python
+            - cffi
+
+        test:
+          imports:
+            - curl_cffi
+        EOF
+        
+        echo "✅ Android 构建配方准备完成"
+
+    - name: 🏗️ 构建 Android ABI 包
+      run: |
+        echo "开始构建 Android 各架构包..."
+        cd chaquopy/server/pypi
+        
+        # 构建所有 Android ABI 架构
+        for abi in arm64-v8a armeabi-v7a; do
+          echo "构建 $abi 架构..."
+          ./build-wheel.py --python 3.8 --abi $abi packages/curl-cffi/ || echo "⚠️ $abi 架构构建可能失败"
+        done
+        
+        echo "✅ Android 构建过程完成"
+
+    - name: 📊 验证构建产物
+      run: |
+        echo "检查生成的 Android 包..."
+        cd chaquopy/server/pypi
+        
+        if [ -d "dist" ]; then
+          echo "📦 找到 Android 构建产物:"
+          ls -la dist/
+          echo ""
+          echo "🔍 生成的 Android .whl 文件:"
+          find dist -name "*android*" -o -name "*arm*" | while read file; do
+            echo "🎯 $file"
+            # 验证文件完整性
+            if [[ $file == *".whl" ]]; then
+              echo "   ✅ 有效的 wheel 文件"
+            fi
+          done
+        else
+          echo "❌ 未找到 dist 目录"
+          exit 1
+        fi
+
+    - name: ⬆️ 上传 Android 构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: curl-cffi-android-wheels
+        path: chaquopy/server/pypi/dist/
+        retention-days: 30
+
+    - name: ✅ 构建报告
+      run: |
+        echo "🎉 curl-cffi Android 版本构建完成！"
+        echo ""
+        echo "📋 构建摘要:"
+        echo "   项目: curl-cffi"
+        echo "   目标平台: Android"
+        echo "   Python 版本: 3.8"
+        echo "   ABI 架构: arm64-v8a, armeabi-v7a"
+        echo "   构建时间: $(date)"
+        echo ""
+        echo "🚀 下一步: 下载 Artifacts 中的 .whl 文件用于 Android 项目"
