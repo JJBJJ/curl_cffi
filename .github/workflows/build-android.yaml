@@ -32,25 +32,18 @@ jobs:
     - name: ⬇️ 下载 Python 目标文件
       run: |
         echo "下载 Python 3.8.20-1 目标文件..."
-        
-        # 创建目录
         mkdir -p chaquopy/maven/com/chaquo/python/target/3.8.20-1
         cd chaquopy/maven/com/chaquo/python/target/3.8.20-1
         
-        echo "当前目录: $(pwd)"
-        
-        # 下载所有四个必要的文件
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-arm64-v8a.zip
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-armeabi-v7a.zip
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib.zip
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib-pyc.zip
         
-        # 解压所有四个文件
         unzip -o target-3.8.20-1-arm64-v8a.zip
-        unzip -o target-3.8.20-1-armeabi-v7a.zip
+        unzip -o target-3.20-1-armeabi-v7a.zip
         unzip -o target-3.8.20-1-stdlib.zip
         unzip -o target-3.8.20-1-stdlib-pyc.zip
-        
         echo "✅ Python 目标文件下载完成"
 
     - name: 🔧 设置 Android SDK
@@ -69,7 +62,7 @@ jobs:
         pip install -r requirements.txt
         echo "✅ Python 依赖安装完成"
 
-    - name: 📝 创建 curl-cffi 配方
+    - name: 📝 创建 curl-cffi 配方（修正版）
       run: |
         cd chaquopy/server/pypi
         mkdir -p packages/curl-cffi
@@ -80,7 +73,7 @@ jobs:
           version: 0.7.0
 
         source:
-          path: ../../../../
+          path: ../../../../../../  # 修正：指向项目根目录
 
         build:
           number: 0
@@ -97,8 +90,8 @@ jobs:
             - python
             - cffi
             - pycparser
-        EOF
-        echo "✅ curl-cffi 配方创建完成"
+    EOF
+        echo "✅ curl-cffi 配方创建完成（已修正源码路径）"
 
     - name: 🏗️ 构建 Android 包
       run: |
