@@ -12,13 +12,10 @@ jobs:
     steps:
     - name: 🛠️ 检出代码
       uses: actions/checkout@v4
-      with:
-        submodules: recursive
 
     - name: 📥 克隆 Chaquopy
       run: |
         git clone --depth 1 https://github.com/chaquo/chaquopy.git
-        echo "CHAQUOPY_DIR=$PWD/chaquopy" >> $GITHUB_ENV
 
     - name: 🐍 设置 Python 环境
       uses: actions/setup-python@v4
@@ -28,7 +25,7 @@ jobs:
     - name: 📦 安装系统工具
       run: |
         sudo apt-get update
-        sudo apt-get install -y patch patchelf wget unzip pkg-config libssl-dev
+        sudo apt-get install -y patch patchelf wget unzip
 
     - name: ⬇️ 下载 Python 目标文件
       run: |
@@ -36,30 +33,29 @@ jobs:
         mkdir -p chaquopy/maven/com/chaquo/python/target/3.8.20-1
         cd chaquopy/maven/com/chaquo/python/target/3.8.20-1
         
-        # 下载所有必要的组件
+        # 下载图片中显示的所有必要文件
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-arm64-v8a.zip
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-armeabi-v7a.zip
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib.zip
         wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib-pyc.zip
         
-        # 使用强制覆盖选项解压（解决文件冲突问题）
+        # 使用强制覆盖解压
         unzip -o target-3.8.20-1-arm64-v8a.zip
         unzip -o target-3.8.20-1-armeabi-v7a.zip
         unzip -o target-3.8.20-1-stdlib.zip
         unzip -o target-3.8.20-1-stdlib-pyc.zip
         
-        echo "✅ Python 3.8.20-1 目标文件下载完成"
+        echo "✅ Python 目标文件下载完成"
 
     - name: 🔧 设置 Android SDK
       run: |
-        mkdir -p android-sdk/cmdline极速版/latest
+        mkdir -p android-sdk/cmdline-tools/latest
         cd android-sdk/cmdline-tools/latest
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip commandlinetools-linux-9477386_latest.zip
-        cd ../../..
-        echo "ANDROID_HOME=$PWD/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_HOME=$PWD/../../.." >> $GITHUB_ENV
 
-    - name: 📚 安装 Python 依赖
+    - name: 📚 准备构建环境
       run: |
         cd chaquopy/server/pypi
         pip install -r requirements.txt
@@ -93,8 +89,6 @@ jobs:
             - cffi
             - pycparser
         EOF
-        
-        echo "✅ curl-cffi 构建配方创建完成"
 
     - name: 🏗️ 构建 Android 包
       run: |
@@ -104,60 +98,8 @@ jobs:
           ./build-wheel.py --python 3.8.20 --abi $abi packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
         done
 
-    - name: 🔍 检查构建产物
-      run: |
-        echo "检查生成的包文件..."
-        cd chaquopy/server/pypi
-        
-        if [ -d "dist" ]; then
-          echo "📦 找到构建产物:"
-          ls -la dist/
-          echo ""
-          echo "🔍 生成的 .whl 文件:"
-          find dist -name "*.whl" | while read file; do
-            echo "🎯 $file"
-            # 验证文件完整性
-            if [ -f "$file" ]; then
-              echo "   ✅ 文件存在 ($(du -h "$file" | cut -f1))"
-            fi
-          done
-        else
-          echo "❌ 未找到 dist 目录"
-          exit 1
-        fi
-
-    - name: ⬆️ 上传构建产物
+    - name: ⬆️ 上传产物
       uses: actions/upload-artifact@v4
       with:
         name: curl-cffi-android-wheels
         path: chaquopy/server/pypi/dist/
-        retention-days: 30
-
-    - name: ✅ 构建完成报告
-      run: |
-        echo "🎉 BUILD SUCCESS"
-        echo "================"
-        echo "项目:    curl-cffi"
-        echo "平台:    Android"
-        echo "Python:  3.8.20"
-        echo "架构:    arm64-v8a, armeabi-v7a"
-        echo "状态:    ✅ 成功"
-        echo "时间:    $(date)"
-        echo ""
-        
-        # 显示生成的产物
-        if [ -d "chaquopy/server/pypi/dist" ]; then
-          echo "生成的包文件:"
-          cd chaquopy/server/pypi/dist
-          for file in *.whl; do
-            if [ -f "$file" ]; then
-              echo "📦 $file"
-            fi
-          done
-        fi
-        
-        echo ""
-        echo "下一步:"
-        echo "1. 下载 'curl-cffi-android-wheels' Artifact"
-        echo "2. 将 .whl 文件添加到 Android 项目的 libs/ 目录"
-        echo "3. 在 build.gradle 中配置本地依赖"
