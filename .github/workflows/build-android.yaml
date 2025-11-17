@@ -20,7 +20,7 @@ jobs:
         git clone --depth 1 https://github.com/chaquo/chaquopy.git
         echo "CHAQUOPY_DIR=$PWD/chaquopy" >> $GITHUB_ENV
 
-    - name: 🐍 设置 Python 3.8
+    - name: 🐍 设置 Python 环境
       uses: actions/setup-python@v4
       with:
         python-version: '3.8'
@@ -32,13 +32,22 @@ jobs:
 
     - name: ⬇️ 下载 Python 目标文件
       run: |
-        echo "下载 Python 3.8 目标文件..."
-        mkdir -p chaquopy/maven/com/chaquo/python/target
-        cd chaquopy/maven/com/chaquo/python/target
+        echo "下载 Python 3.8.20-1 目标文件..."
+        mkdir -p chaquopy/maven/com/chaquo/python/target/3.8.20-1
+        cd chaquopy/maven/com/chaquo/python/target/3.8.20-1
         
-        # 使用图片中存在的版本（选择最新版本）
-        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1.zip
-        unzip target-3.8.20-1.zip
+        # 下载所有必要的组件
+        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-arm64-v8a.zip
+        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-armeabi-v7a.zip
+        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib.zip
+        wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.8.20-1/target-3.8.20-1-stdlib-pyc.zip
+        
+        # 解压所有组件
+        unzip target-3.8.20-1-arm64-v8a.zip
+        unzip target-3.8.20-1-armeabi-v7a.zip
+        unzip target-3.8.20-1-stdlib.zip
+        unzip target-3.8.20-1-stdlib-pyc.zip
+        
         echo "✅ Python 3.8.20-1 目标文件下载完成"
 
     - name: 🔧 设置 Android SDK
@@ -47,7 +56,8 @@ jobs:
         cd android-sdk/cmdline-tools/latest
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip commandlinetools-linux-9477386_latest.zip
-        echo "ANDROID_HOME=$PWD/../../.." >> $GITHUB_ENV
+        cd ../../..
+        echo "ANDROID_HOME=$PWD/android-sdk" >> $GITHUB_ENV
 
     - name: 📚 安装 Python 依赖
       run: |
@@ -89,7 +99,6 @@ jobs:
         cd chaquopy/server/pypi
         for abi in arm64-v8a armeabi-v7a; do
           echo "构建 $abi 架构..."
-          # 使用正确的版本号 3.8.20
           ./build-wheel.py --python 3.8.20 --abi $abi packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
         done
 
