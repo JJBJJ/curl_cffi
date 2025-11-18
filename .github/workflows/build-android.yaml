@@ -101,14 +101,7 @@ jobs:
               - CFLAGS=-I/tmp/curl-include
               - LDFLAGS=-L/tmp/curl-lib
 
-          requirements:
-            build:
-              - python
-              - setuptools
-              - wheel
-              - pycparser
-            host:
-              - python
+          requirements: {}
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
