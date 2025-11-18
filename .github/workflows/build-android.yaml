@@ -52,7 +52,9 @@ jobs:
           mkdir -p android-sdk/cmdline-tools
           cd android-sdk/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip commandlinetools-linux-9477386_latest.zip -d latest/
+          unzip -q commandlinetools-linux-9477386_latest.zip
+          mkdir -p latest
+          mv cmdline-tools/* latest/ 2>/dev/null || true
           echo "ANDROID_HOME=$PWD/.." >> $GITHUB_ENV
           echo "✅ Android SDK 设置完成"
 
