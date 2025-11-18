@@ -82,7 +82,8 @@ jobs:
 
           requirements:
             build: []
-            host: []
+            host:
+              - python
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
