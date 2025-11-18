@@ -79,13 +79,8 @@ jobs:
             number: 0
 
           requirements:
-            build:
-              - python
-              - pip
-              - setuptools
-              - wheel
-            host:
-              - python
+            build: []
+            host: []
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
