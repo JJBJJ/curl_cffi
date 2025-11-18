@@ -68,8 +68,17 @@ jobs:
           cd /tmp/curl-headers
           wget -q https://github.com/curl/curl/archive/refs/tags/curl-7_85_0.tar.gz
           tar -xzf curl-7_85_0.tar.gz
-          mkdir -p /tmp/curl-include
-          cp curl-curl-7_85_0/include/curl/*.h /tmp/curl-include/ 2>/dev/null || true
+          
+          # 创建正确的目录结构
+          mkdir -p /tmp/curl-include/curl
+          cp curl-curl-7_85_0/include/curl/*.h /tmp/curl-include/curl/ 2>/dev/null || true
+          
+          # 验证头文件
+          echo "✅ 已安装的 curl 头文件:"
+          ls -la /tmp/curl-include/curl/
+          
+          # 安装构建依赖
+          pip install cffi>=1.0.0 pycparser
           
           echo "✅ Python 依赖安装完成"
 
@@ -88,15 +97,24 @@ jobs:
 
           build:
             number: 0
-            script: |
-              export CFLAGS="-I/tmp/curl-include"
-              export LDFLAGS="-L/tmp/curl-lib"
-              python -m pip install --no-build-isolation .
+            script_env:
+              - CFLAGS=-I/tmp/curl-include
+              - LDFLAGS=-L/tmp/curl-lib
 
           requirements:
-            build: []
+            build:
+              - python
+              - pip
+              - setuptools
+              - wheel
+              - cffi>=1.0.0
+              - pycparser
             host:
               - python
+              - pip
+            run:
+              - python
+              - cffi>=1.0.0
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
