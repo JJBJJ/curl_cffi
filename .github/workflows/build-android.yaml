@@ -21,7 +21,7 @@ jobs:
       - name: 🐍 设置 Python 环境
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: 📦 安装系统工具
         run: |
@@ -70,10 +70,10 @@ jobs:
           cat > packages/curl-cffi/meta.yaml <<'EOF'
           package:
             name: curl-cffi
-            version: 0.7.0
+            version: 0.13.0
 
           source:
-            url: https://github.com/yifeikong/curl_cffi/archive/refs/tags/v0.7.0.tar.gz
+            url: https://github.com/yifeikong/curl_cffi/archive/refs/tags/v0.13.0.tar.gz
 
           build:
             number: 0
@@ -98,7 +98,7 @@ jobs:
           cd chaquopy/server/pypi
           for abi in arm64-v8a armeabi-v7a; do
             echo "构建 $abi 架构..."
-            ./build-wheel.py --python 3.8 --abi "$abi" packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
+            ./build-wheel.py --python 3.9 --abi "$abi" packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
           done
 
       - name: ⬆️ 上传产物
