@@ -112,8 +112,6 @@ jobs:
             host:
               - python
               - pip
-            run:
-              - python
               - cffi>=1.0.0
           EOF
                 echo "✅ curl-cffi 配方写入完成"
