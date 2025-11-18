@@ -106,11 +106,11 @@ jobs:
               - python
               - setuptools
               - wheel
-              - cffi>=1.0.0
+              - cffi
               - pycparser
             host:
               - python
-              - cffi>=1.0.0
+              - cffi
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
