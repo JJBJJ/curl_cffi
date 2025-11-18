@@ -95,6 +95,24 @@ jobs:
         run: |
           cd chaquopy/server/pypi
           mkdir -p packages/curl-cffi
+          
+          # 复制 cURL 头文件到 curl-cffi 源代码目录
+          # 这样编译器能找到它们
+          mkdir -p packages/curl-cffi/include/curl
+          cp /tmp/curl-include/curl/*.h packages/curl-cffi/include/curl/ 2>/dev/null || true
+          
+          echo "✅ cURL 头文件已复制到源代码目录"
+          ls -la packages/curl-cffi/include/curl/
+          
+          # 下载 pyconfig.h 到源代码目录
+          echo "📥 下载 pyconfig.h..."
+          wget -O packages/curl-cffi/pyconfig.h "https://raw.githubusercontent.com/JJBJJ/curl_cffi/refs/heads/main/pyconfig.h"
+          
+          if [ -f packages/curl-cffi/pyconfig.h ]; then
+            echo "✅ pyconfig.h 已下载"
+          else
+            echo "⚠️ pyconfig.h 下载失败"
+          fi
 
           cat > packages/curl-cffi/meta.yaml <<'EOF'
           package:
