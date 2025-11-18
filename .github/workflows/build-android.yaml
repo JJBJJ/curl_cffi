@@ -21,7 +21,7 @@ jobs:
       - name: 🐍 设置 Python 环境
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       - name: 📦 安装系统工具
         run: |
@@ -34,19 +34,19 @@ jobs:
 
       - name: ⬇️ 下载 Python 目标文件
         run: |
-          echo "下载 Python 3.9.20-1 目标文件..."
-          mkdir -p chaquopy/maven/com/chaquo/python/target/3.9.20-1
-          cd chaquopy/maven/com/chaquo/python/target/3.9.20-1
+          echo "下载 Python 3.10 目标文件..."
+          mkdir -p chaquopy/maven/com/chaquo/python/target/3.10.13-0
+          cd chaquopy/maven/com/chaquo/python/target/3.10.13-0
 
-          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.9.20-1/target-3.9.20-1-arm64-v8a.zip
-          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.9.20-1/target-3.9.20-1-armeabi-v7a.zip
-          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.9.20-1/target-3.9.20-1-stdlib.zip
-          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.9.20-1/target-3.9.20-1-stdlib-pyc.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.10.13-0/target-3.10.13-0-arm64-v8a.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.10.13-0/target-3.10.13-0-armeabi-v7a.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.10.13-0/target-3.10.13-0-stdlib.zip
+          wget https://repo1.maven.org/maven2/com/chaquo/python/target/3.10.13-0/target-3.10.13-0-stdlib-pyc.zip
 
-          unzip -o target-3.9.20-1-arm64-v8a.zip
-          unzip -o target-3.9.20-1-armeabi-v7a.zip
-          unzip -o target-3.9.20-1-stdlib.zip
-          unzip -o target-3.9.20-1-stdlib-pyc.zip
+          unzip -o target-3.10.13-0-arm64-v8a.zip
+          unzip -o target-3.10.13-0-armeabi-v7a.zip
+          unzip -o target-3.10.13-0-stdlib.zip
+          unzip -o target-3.10.13-0-stdlib-pyc.zip
           echo "✅ Python 目标文件下载完成"
           
           # 验证解压结果
@@ -95,24 +95,6 @@ jobs:
         run: |
           cd chaquopy/server/pypi
           mkdir -p packages/curl-cffi
-          
-          # 复制 cURL 头文件到 curl-cffi 源代码目录
-          # 这样编译器能找到它们
-          mkdir -p packages/curl-cffi/include/curl
-          cp /tmp/curl-include/curl/*.h packages/curl-cffi/include/curl/ 2>/dev/null || true
-          
-          echo "✅ cURL 头文件已复制到源代码目录"
-          ls -la packages/curl-cffi/include/curl/
-          
-          # 下载 pyconfig.h 到源代码目录
-          echo "📥 下载 pyconfig.h..."
-          wget -O packages/curl-cffi/pyconfig.h "https://raw.githubusercontent.com/JJBJJ/curl_cffi/refs/heads/main/pyconfig.h"
-          
-          if [ -f packages/curl-cffi/pyconfig.h ]; then
-            echo "✅ pyconfig.h 已下载"
-          else
-            echo "⚠️ pyconfig.h 下载失败"
-          fi
 
           cat > packages/curl-cffi/meta.yaml <<'EOF'
           package:
@@ -136,7 +118,7 @@ jobs:
           cd chaquopy/server/pypi
           for abi in arm64-v8a armeabi-v7a; do
             echo "构建 $abi 架构..."
-            ./build-wheel.py --python 3.9 --abi "$abi" packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
+            ./build-wheel.py --python 3.10 --abi "$abi" packages/curl-cffi/ || echo "⚠️ $abi 架构构建失败"
           done
 
       - name: ⬆️ 上传产物
