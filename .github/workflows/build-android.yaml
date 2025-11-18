@@ -48,6 +48,12 @@ jobs:
           unzip -o target-3.9.20-1-stdlib.zip
           unzip -o target-3.9.20-1-stdlib-pyc.zip
           echo "✅ Python 目标文件下载完成"
+          
+          # 验证解压结果
+          echo "📁 解压后的目录结构:"
+          ls -la
+          echo "🔍 查找 pyconfig.h:"
+          find . -name "pyconfig.h" | head -3
 
       - name: 🔧 设置 Android SDK
         run: |
