@@ -100,11 +100,11 @@ jobs:
 
           build:
             number: 0
-            script: |
-              export C_INCLUDE_PATH=/tmp/curl-include:$PREFIX/include/python3.9
-              export CPLUS_INCLUDE_PATH=/tmp/curl-include:$PREFIX/include/python3.9
-              export LDFLAGS="-L/tmp/curl-lib -L$PREFIX/lib"
-              python -m pip install --no-deps -v .
+            script_env:
+              - CFLAGS=-I/tmp/curl-include -I$PREFIX/include/python3.9
+              - LDFLAGS=-L/tmp/curl-lib -L$PREFIX/lib
+              - C_INCLUDE_PATH=/tmp/curl-include:$PREFIX/include/python3.9
+              - CPLUS_INCLUDE_PATH=/tmp/curl-include:$PREFIX/include/python3.9
 
           requirements:
             host:
