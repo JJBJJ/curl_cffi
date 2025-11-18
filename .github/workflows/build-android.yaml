@@ -89,31 +89,7 @@ jobs:
           # 安装构建依赖
           pip install cffi
           
-          # 下载 Python 头文件
-          mkdir -p /tmp/python-include
-          
-          echo "📥 从 GitHub 下载 pyconfig.h..."
-          wget -O /tmp/python-include/pyconfig.h "https://raw.githubusercontent.com/JJBJJ/curl_cffi/refs/heads/main/pyconfig.h"
-          
-          # 验证 pyconfig.h 是否存在
-          if [ -f /tmp/python-include/pyconfig.h ]; then
-            echo "✅ 成功下载 pyconfig.h"
-            ls -lh /tmp/python-include/pyconfig.h
-          else
-            echo "❌ 下载 pyconfig.h 失败"
-          fi
-          
-          # 尝试从本地 Chaquopy 目标文件复制其他 Python 头文件
-          echo "📂 复制其他 Python 头文件..."
-          PYTHON_HEADERS=$(find chaquopy/maven/com/chaquo/python/target/3.9.20-1 -path "*/include/python3.9/*.h" -type f 2>/dev/null | head -5)
-          if [ -n "$PYTHON_HEADERS" ]; then
-            find chaquopy/maven/com/chaquo/python/target/3.9.20-1 -path "*/include/python3.9/*.h" -type f -exec cp {} /tmp/python-include/ \; 2>/dev/null
-            echo "✅ 复制了其他 Python 头文件"
-          else
-            echo "⚠️ 未找到其他 Python 头文件，但 pyconfig.h 已就位"
-          fi
-          
-          echo "✅ Python 头文件准备完成"
+          echo "✅ 构建环境准备完成"
 
       - name: 创建 curl-cffi 配方
         run: |
@@ -130,15 +106,12 @@ jobs:
 
           build:
             number: 0
-            script_env:
-              - CFLAGS=-I/tmp/curl-include
-              - LDFLAGS=-L/tmp/curl-lib
 
           requirements:
             host:
               - python
           EOF
-                echo "✅ curl-cffi 配方写入完成"
+                echo " curl-cffi 配方写入完成"
 
       - name: 构建 Android 包
         run: |
