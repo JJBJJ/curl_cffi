@@ -89,43 +89,33 @@ jobs:
           # 安装构建依赖
           pip install cffi
           
-          # 使用 Chaquopy 下载的 Python 目标文件中的头文件
-          # 这些是为 Android 编译的正确头文件
+          # 下载 Python 头文件
           mkdir -p /tmp/python-include
           
-          # 诊断：查看实际的目录结构
-          echo "📁 检查 Python 目标文件的实际目录结构:"
-          find chaquopy/maven/com/chaquo/python/target/3.9.20-1 -type f -name "pyconfig.h" 2>/dev/null
-          
-          # 从 arm64-v8a 目标文件复制 Python 头文件
-          PYTHON_TARGET_PATH="chaquopy/maven/com/chaquo/python/target/3.9.20-1/arm64-v8a/include/python3.9"
-          if [ -d "$PYTHON_TARGET_PATH" ]; then
-            cp -r "$PYTHON_TARGET_PATH"/* /tmp/python-include/ 2>/dev/null || true
-            echo "✅ 从 Chaquopy 目标文件复制了 Python 头文件"
-          else
-            echo "⚠️ 未找到预期路径: $PYTHON_TARGET_PATH"
-            echo "🔍 寻找 pyconfig.h 的实际位置..."
-            ACTUAL_PATH=$(find chaquopy/maven/com/chaquo/python/target/3.9.20-1 -type f -name "pyconfig.h" | head -1)
-            if [ -n "$ACTUAL_PATH" ]; then
-              ACTUAL_DIR=$(dirname "$ACTUAL_PATH")
-              echo "✅ 找到 pyconfig.h 在: $ACTUAL_DIR"
-              cp -r "$ACTUAL_DIR"/* /tmp/python-include/ 2>/dev/null || true
-            else
-              echo "❌ 未找到任何 pyconfig.h"
-            fi
-          fi
+          echo "📥 从 GitHub 下载 pyconfig.h..."
+          wget -O /tmp/python-include/pyconfig.h "https://raw.githubusercontent.com/JJBJJ/curl_cffi/refs/heads/main/pyconfig.h"
           
           # 验证 pyconfig.h 是否存在
           if [ -f /tmp/python-include/pyconfig.h ]; then
-            echo "✅ 找到 pyconfig.h"
-            head -20 /tmp/python-include/pyconfig.h
+            echo "✅ 成功下载 pyconfig.h"
+            ls -lh /tmp/python-include/pyconfig.h
           else
-            echo "⚠️ 未找到 pyconfig.h"
+            echo "❌ 下载 pyconfig.h 失败"
           fi
           
-          echo "✅ Python 依赖安装完成"
+          # 尝试从本地 Chaquopy 目标文件复制其他 Python 头文件
+          echo "📂 复制其他 Python 头文件..."
+          PYTHON_HEADERS=$(find chaquopy/maven/com/chaquo/python/target/3.9.20-1 -path "*/include/python3.9/*.h" -type f 2>/dev/null | head -5)
+          if [ -n "$PYTHON_HEADERS" ]; then
+            find chaquopy/maven/com/chaquo/python/target/3.9.20-1 -path "*/include/python3.9/*.h" -type f -exec cp {} /tmp/python-include/ \; 2>/dev/null
+            echo "✅ 复制了其他 Python 头文件"
+          else
+            echo "⚠️ 未找到其他 Python 头文件，但 pyconfig.h 已就位"
+          fi
+          
+          echo "✅ Python 头文件准备完成"
 
-      - name: 📝 创建 curl-cffi 配方
+      - name: 创建 curl-cffi 配方
         run: |
           cd chaquopy/server/pypi
           mkdir -p packages/curl-cffi
