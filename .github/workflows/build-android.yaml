@@ -135,11 +135,12 @@ jobs:
               - LDFLAGS=-L/tmp/curl-lib
 
           requirements:
-            host: []
+            host:
+              - python
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
-      - name: 🏗️ 构建 Android 包
+      - name: 构建 Android 包
         run: |
           cd chaquopy/server/pypi
           for abi in arm64-v8a armeabi-v7a; do
