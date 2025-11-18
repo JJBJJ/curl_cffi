@@ -73,7 +73,8 @@ jobs:
             version: 0.7.0
 
           source:
-            path: ../../..
+            url: https://github.com/yifeikong/curl_cffi/archive/refs/tags/v0.7.0.tar.gz
+            sha256: auto
 
           build:
             number: 0
