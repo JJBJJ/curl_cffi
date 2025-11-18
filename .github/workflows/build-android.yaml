@@ -83,6 +83,11 @@ jobs:
           # 安装构建依赖
           pip install cffi>=1.0.0 pycparser
           
+          # 复制 Python 头文件到临时位置
+          mkdir -p /tmp/python-include
+          find /usr/include -name "pyconfig.h" -exec cp {} /tmp/python-include/ \; 2>/dev/null || true
+          find /usr/include/python* -name "*.h" -exec cp {} /tmp/python-include/ \; 2>/dev/null || true
+          
           echo "✅ Python 依赖安装完成"
 
       - name: 📝 创建 curl-cffi 配方
@@ -101,10 +106,11 @@ jobs:
           build:
             number: 0
             script_env:
-              - CFLAGS=-I/tmp/curl-include -I$PREFIX/include/python3.9
-              - LDFLAGS=-L/tmp/curl-lib -L$PREFIX/lib
-              - C_INCLUDE_PATH=/tmp/curl-include:$PREFIX/include/python3.9
-              - CPLUS_INCLUDE_PATH=/tmp/curl-include:$PREFIX/include/python3.9
+              - CFLAGS=-I/tmp/curl-include -I/tmp/python-include
+              - LDFLAGS=-L/tmp/curl-lib
+              - C_INCLUDE_PATH=/tmp/curl-include:/tmp/python-include
+              - CPLUS_INCLUDE_PATH=/tmp/curl-include:/tmp/python-include
+              - CPPFLAGS=-I/tmp/curl-include -I/tmp/python-include
 
           requirements:
             host:
