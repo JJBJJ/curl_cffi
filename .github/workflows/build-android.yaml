@@ -84,12 +84,8 @@ jobs:
               - pip
               - setuptools
               - wheel
-              - cffi
-              - pycparser
             host:
               - python
-              - cffi
-              - pycparser
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
