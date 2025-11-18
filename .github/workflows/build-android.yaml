@@ -98,8 +98,9 @@ jobs:
           build:
             number: 0
             script_env:
-              - CFLAGS=-I/tmp/curl-include
+              - CFLAGS=-I/tmp/curl-include -I$PREFIX/include/python3.9
               - LDFLAGS=-L/tmp/curl-lib
+              - PYTHON_INCLUDE=$PREFIX/include/python3.9
 
           requirements:
             host:
