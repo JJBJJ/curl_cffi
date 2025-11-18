@@ -83,19 +83,24 @@ jobs:
           # 安装构建依赖
           pip install cffi>=1.0.0 pycparser
           
-          # 复制 Python 3.9 头文件到临时位置
+          # 使用 Chaquopy 下载的 Python 目标文件中的头文件
+          # 这些是为 Android 编译的正确头文件
           mkdir -p /tmp/python-include
-          # 只复制 Python 3.9 的头文件
-          if [ -d /usr/include/python3.9 ]; then
-            cp -r /usr/include/python3.9/* /tmp/python-include/ 2>/dev/null || true
+          
+          # 从 arm64-v8a 目标文件复制 Python 头文件
+          if [ -d chaquopy/maven/com/chaquo/python/target/3.9.20-1/arm64-v8a/include/python3.9 ]; then
+            cp -r chaquopy/maven/com/chaquo/python/target/3.9.20-1/arm64-v8a/include/python3.9/* /tmp/python-include/ 2>/dev/null || true
+            echo "✅ 从 Chaquopy 目标文件复制了 Python 头文件"
+          else
+            echo "⚠️ 未找到 Chaquopy Python 目标文件"
           fi
-          # 如果在其他位置，也尝试复制
-          find /usr/include -path "*python3.9*" -name "*.h" -exec cp {} /tmp/python-include/ \; 2>/dev/null || true
+          
           # 验证 pyconfig.h 是否存在
           if [ -f /tmp/python-include/pyconfig.h ]; then
             echo "✅ 找到 pyconfig.h"
+            head -20 /tmp/python-include/pyconfig.h
           else
-            echo "⚠️ 未找到 pyconfig.h，尝试从 python3.9-dev 包"
+            echo "⚠️ 未找到 pyconfig.h"
           fi
           
           echo "✅ Python 依赖安装完成"
@@ -116,13 +121,12 @@ jobs:
           build:
             number: 0
             script_env:
-              - CFLAGS=-I/tmp/curl-include -I/tmp/python-include
+              - CFLAGS=-I/tmp/curl-include
               - LDFLAGS=-L/tmp/curl-lib
-              - C_INCLUDE_PATH=/tmp/curl-include:/tmp/python-include
-              - CPLUS_INCLUDE_PATH=/tmp/curl-include:/tmp/python-include
-              - CPPFLAGS=-I/tmp/curl-include -I/tmp/python-include
 
           requirements:
+            build:
+              - python
             host:
               - python
           EOF
