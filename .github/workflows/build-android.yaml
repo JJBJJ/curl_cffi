@@ -104,14 +104,12 @@ jobs:
           requirements:
             build:
               - python
-              - pip
               - setuptools
               - wheel
               - cffi>=1.0.0
               - pycparser
             host:
               - python
-              - pip
               - cffi>=1.0.0
           EOF
                 echo "✅ curl-cffi 配方写入完成"
