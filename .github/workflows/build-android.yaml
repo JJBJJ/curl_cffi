@@ -98,9 +98,9 @@ jobs:
           build:
             number: 0
             script_env:
-              - CFLAGS=-I/tmp/curl-include -I$PREFIX/include/python3.9
-              - LDFLAGS=-L/tmp/curl-lib
-              - PYTHON_INCLUDE=$PREFIX/include/python3.9
+              - CFLAGS=-I/tmp/curl-include -I/home/runner/work/curl_cffi/curl_cffi/chaquopy/maven/com/chaquo/python/target/3.9.20-1/arm64-v8a/include/python3.9
+              - LDFLAGS=-L/tmp/curl-lib -L/home/runner/work/curl_cffi/curl_cffi/chaquopy/maven/com/chaquo/python/target/3.9.20-1/arm64-v8a/lib
+              - PYTHON_INCLUDE=/home/runner/work/curl_cffi/curl_cffi/chaquopy/maven/com/chaquo/python/target/3.9.20-1/arm64-v8a/include/python3.9
 
           requirements:
             host:
