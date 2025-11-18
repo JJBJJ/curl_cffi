@@ -26,7 +26,7 @@ jobs:
       - name: 📦 安装系统工具
         run: |
           sudo apt-get update
-          sudo apt-get install -y patch patchelf wget unzip
+          sudo apt-get install -y patch patchelf wget unzip build-essential pkg-config libssl-dev
           echo "✅ 系统工具安装完成"
 
       - name: ⬇️ 下载 Python 目标文件
@@ -84,7 +84,6 @@ jobs:
             build: []
             host:
               - python
-              - libcurl
           EOF
                 echo "✅ curl-cffi 配方写入完成"
 
