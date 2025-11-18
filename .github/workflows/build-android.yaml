@@ -62,6 +62,15 @@ jobs:
         run: |
           cd chaquopy/server/pypi
           pip install -r requirements.txt
+          
+          # 下载 libcurl 头文件
+          mkdir -p /tmp/curl-headers
+          cd /tmp/curl-headers
+          wget -q https://github.com/curl/curl/archive/refs/tags/curl-7_85_0.tar.gz
+          tar -xzf curl-7_85_0.tar.gz
+          mkdir -p /tmp/curl-include
+          cp curl-curl-7_85_0/include/curl/*.h /tmp/curl-include/ 2>/dev/null || true
+          
           echo "✅ Python 依赖安装完成"
 
       - name: 📝 创建 curl-cffi 配方
@@ -79,6 +88,10 @@ jobs:
 
           build:
             number: 0
+            script: |
+              export CFLAGS="-I/tmp/curl-include"
+              export LDFLAGS="-L/tmp/curl-lib"
+              python -m pip install --no-build-isolation .
 
           requirements:
             build: []
